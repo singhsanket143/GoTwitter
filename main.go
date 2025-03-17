@@ -23,5 +23,7 @@ func main() {
 		Config: cfg,
 	}
 
+	log.Printf("Server has started at %s", cfg.Addr)
+
 	log.Fatal(application.Run())
 }
