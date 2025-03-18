@@ -1,9 +1,9 @@
 package app
 
 import (
+	dbConfig "GoTwitter/config/db"
 	db "GoTwitter/db/repository"
 	"GoTwitter/router"
-	"log"
 	"net/http"
 	"time"
 )
@@ -15,6 +15,7 @@ type Application struct {
 
 type Config struct {
 	Addr string
+	Db   dbConfig.DBConfig
 }
 
 func (app *Application) Run() error {
@@ -27,8 +28,6 @@ func (app *Application) Run() error {
 		ReadTimeout:  10 * time.Second,
 		IdleTimeout:  time.Minute,
 	}
-
-	log.Printf("Server has started at %s", app.Config.Addr)
 
 	return server.ListenAndServe()
 }
