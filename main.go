@@ -3,6 +3,7 @@ package main
 import (
 	"GoTwitter/app"
 	config "GoTwitter/config/env"
+	db "GoTwitter/db/repository"
 	"fmt"
 	"log"
 )
@@ -19,8 +20,11 @@ func main() {
 		Addr: port,
 	}
 
+	store := db.NewMySQLStorage(nil)
+
 	application := &app.Application{
 		Config: cfg,
+		Store:  store,
 	}
 
 	log.Printf("Server has started at %s", cfg.Addr)
