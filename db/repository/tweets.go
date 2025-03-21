@@ -11,7 +11,7 @@ type TweetsRepository interface {
 	GetByID(context context.Context, id int64) (*models.Tweet, error)
 	GetAll(context context.Context) ([]*models.Tweet, error)
 	Update(context context.Context, id int64) error
-	Delete(context context.Context, id int64) error
+	Delete(context context.Context, id int64) (bool, error)
 }
 
 type TweetsStore struct {
@@ -47,17 +47,52 @@ func (s *TweetsStore) Create(ctx context.Context, tweet *models.Tweet) error {
 }
 
 func (s *TweetsStore) GetByID(ctx context.Context, id int64) (*models.Tweet, error) {
-	return nil, nil
+
+	query := `SELECT id, tweet, user_id, created_at, updated_at FROM tweets WHERE id = ?`
+	row := s.db.QueryRowContext(ctx, query, id)
+
+	tweet := &models.Tweet{}
+	if err := row.Scan(&tweet.Id, &tweet.Tweet, &tweet.UserId, &tweet.CreatedAt, &tweet.UpdatedAt); err != nil {
+		return nil, err
+	}
+
+	return tweet, nil
 }
 
 func (s *TweetsStore) GetAll(ctx context.Context) ([]*models.Tweet, error) {
-	return nil, nil
+
+	query := `SELECT id, tweet, user_id, created_at, updated_at FROM tweets`
+	rows, err := s.db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var tweets []*models.Tweet
+	for rows.Next() {
+		tweet := &models.Tweet{}
+		if err := rows.Scan(&tweet.Id, &tweet.Tweet, &tweet.UserId, &tweet.CreatedAt, &tweet.UpdatedAt); err != nil {
+			return nil, err
+		}
+		tweets = append(tweets, tweet)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+	return tweets, nil
 }
 
 func (s *TweetsStore) Update(ctx context.Context, id int64) error {
 	return nil
 }
 
-func (s *TweetsStore) Delete(ctx context.Context, id int64) error {
-	return nil
+func (s *TweetsStore) Delete(ctx context.Context, id int64) (bool, error) {
+
+	query := `DELETE FROM tweets WHERE id = ?`
+	_, err := s.db.ExecContext(ctx, query, id)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
 }

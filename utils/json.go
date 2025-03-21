@@ -17,6 +17,22 @@ func ReadJson(r *http.Request, data any) error {
 	return decoder.Decode(data)
 }
 
-func WriteJsonError(w http.ResponseWriter, status int, message string) error {
-	return WriteJson(w, status, map[string]string{"error": message})
+func WriteJsonError(w http.ResponseWriter, status int, message string, err any) error {
+	response := map[string]any{}
+	response["data"] = nil
+	response["status"] = status
+	response["message"] = message
+	response["success"] = true
+	response["error"] = err
+	return WriteJson(w, status, response)
+}
+
+func WriteJsonSuccess(w http.ResponseWriter, status int, message string, data any) error {
+	response := map[string]any{}
+	response["data"] = data
+	response["status"] = status
+	response["message"] = message
+	response["success"] = true
+	response["error"] = nil
+	return WriteJson(w, status, response)
 }

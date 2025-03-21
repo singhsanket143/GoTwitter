@@ -8,6 +8,9 @@ import (
 
 type TweetService interface {
 	CreateTweet(ctx context.Context, tweet *models.Tweet) error
+	GetAllTweets(ctx context.Context) ([]*models.Tweet, error)
+	GetTweetById(ctx context.Context, id int64) (*models.Tweet, error)
+	DeleteTweet(ctx context.Context, id int64) (bool, error)
 }
 
 type tweetService struct {
@@ -20,4 +23,16 @@ func NewTweetService(tweetRepository db.TweetsRepository) TweetService {
 
 func (s *tweetService) CreateTweet(ctx context.Context, tweet *models.Tweet) error {
 	return s.tweetRepository.Create(ctx, tweet)
+}
+
+func (s *tweetService) GetAllTweets(ctx context.Context) ([]*models.Tweet, error) {
+	return s.tweetRepository.GetAll(ctx)
+}
+
+func (s *tweetService) GetTweetById(ctx context.Context, id int64) (*models.Tweet, error) {
+	return s.tweetRepository.GetByID(ctx, id)
+}
+
+func (s *tweetService) DeleteTweet(ctx context.Context, id int64) (bool, error) {
+	return s.tweetRepository.Delete(ctx, id)
 }

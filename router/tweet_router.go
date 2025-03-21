@@ -17,5 +17,11 @@ func NewTweetRouter(tweetHandler *handlers.TweetHandler) Routes {
 func (tweetRouter *TweetRouter) Register(r chi.Router) {
 	r.Route("/tweets", func(r chi.Router) {
 		r.Post("/", tweetRouter.TweetHandler.CreateTweetHandler)
+		r.Get("/", tweetRouter.TweetHandler.GetAllTweetsHandler)
+
+		r.Route("/{tweetId}", func(r chi.Router) {
+			r.Get("/", tweetRouter.TweetHandler.GetTweetByIdHandler)
+			r.Delete("/", tweetRouter.TweetHandler.DeleteTweetHandler)
+		})
 	})
 }
