@@ -1,13 +1,14 @@
 package db
 
 import (
+	"GoTwitter/dto"
 	"GoTwitter/models"
 	"context"
 	"database/sql"
 )
 
 type TweetsRepository interface {
-	Create(context context.Context, tweet *models.Tweet) error
+	Create(context context.Context, tweet *dto.CreateTweetDTO) (*models.Tweet, error)
 	GetByID(context context.Context, id int64) (*models.Tweet, error)
 	GetAll(context context.Context) ([]*models.Tweet, error)
 	Update(context context.Context, id int64) error
@@ -22,28 +23,29 @@ func NewTweetsStore(db *sql.DB) *TweetsStore {
 	return &TweetsStore{db}
 }
 
-func (s *TweetsStore) Create(ctx context.Context, tweet *models.Tweet) error {
+func (s *TweetsStore) Create(ctx context.Context, tweet *dto.CreateTweetDTO) (*models.Tweet, error) {
 	// Step 1: Insert the tweet
 	query := `INSERT INTO tweets (tweet, user_id) VALUES (?, ?)`
 	result, err := s.db.ExecContext(ctx, query, tweet.Tweet, tweet.UserId)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// Step 2: Get the inserted tweet ID
 	id, err := result.LastInsertId()
 	if err != nil {
-		return err
+		return nil, err
 	}
-	tweet.Id = int64(id)
+	Id := int64(id)
 
 	// Step 3 (optional): Fetch the full row (to get created_at, updated_at)
-	row := s.db.QueryRowContext(ctx, "SELECT created_at, updated_at FROM tweets WHERE id = ?", tweet.Id)
-	if err := row.Scan(&tweet.CreatedAt, &tweet.UpdatedAt); err != nil {
-		return err
+	newtweet := &models.Tweet{}
+	row := s.db.QueryRowContext(ctx, "SELECT id, tweet, user_id, created_at, updated_at FROM tweets WHERE id = ?", Id)
+	if err := row.Scan(&newtweet.Id, &newtweet.Tweet, &newtweet.UserId, &newtweet.CreatedAt, &newtweet.UpdatedAt); err != nil {
+		return nil, err
 	}
 
-	return nil
+	return newtweet, nil
 }
 
 func (s *TweetsStore) GetByID(ctx context.Context, id int64) (*models.Tweet, error) {

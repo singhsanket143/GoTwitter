@@ -2,12 +2,13 @@ package services
 
 import (
 	db "GoTwitter/db/repository"
+	"GoTwitter/dto"
 	"GoTwitter/models"
 	"context"
 )
 
 type TweetService interface {
-	CreateTweet(ctx context.Context, tweet *models.Tweet) error
+	CreateTweet(ctx context.Context, tweet *dto.CreateTweetDTO) (*models.Tweet, error)
 	GetAllTweets(ctx context.Context) ([]*models.Tweet, error)
 	GetTweetById(ctx context.Context, id int64) (*models.Tweet, error)
 	DeleteTweet(ctx context.Context, id int64) (bool, error)
@@ -21,7 +22,7 @@ func NewTweetService(tweetRepository db.TweetsRepository) TweetService {
 	return &tweetService{tweetRepository}
 }
 
-func (s *tweetService) CreateTweet(ctx context.Context, tweet *models.Tweet) error {
+func (s *tweetService) CreateTweet(ctx context.Context, tweet *dto.CreateTweetDTO) (*models.Tweet, error) {
 	return s.tweetRepository.Create(ctx, tweet)
 }
 

@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"GoTwitter/models"
+	"GoTwitter/dto"
 	"GoTwitter/services"
 	"GoTwitter/utils"
 	"net/http"
@@ -20,13 +20,19 @@ func NewTweetHandler(tweetService services.TweetService) *TweetHandler {
 
 func (h *TweetHandler) CreateTweetHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	var tweet models.Tweet
-	if err := utils.ReadJson(r, &tweet); err != nil {
+	var payload dto.CreateTweetDTO
+	if err := utils.ReadJson(r, &payload); err != nil {
 		utils.WriteJsonError(w, http.StatusBadRequest, "Something went wrong", err.Error())
 		return
 	}
 
-	if err := h.tweetService.CreateTweet(ctx, &tweet); err != nil {
+	if err := utils.Validate.Struct(payload); err != nil {
+		utils.WriteJsonError(w, http.StatusBadRequest, "Invalid request payload", err.Error())
+		return
+	}
+
+	tweet, err := h.tweetService.CreateTweet(ctx, &payload)
+	if err != nil {
 		utils.WriteJsonError(w, http.StatusInternalServerError, "Something went wrong", err.Error())
 		return
 	}
