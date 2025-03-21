@@ -1,6 +1,7 @@
 package config
 
 import (
+	config "GoTwitter/config/env"
 	"context"
 	"database/sql"
 	"log"
@@ -9,14 +10,13 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-type DBConfig struct {
-	Addr               string
-	MaxOpenConnections int
-	MaxIdleConnections int
-	MaxIdleTime        int
-}
+func SetupNewDbConn() (*sql.DB, error) {
 
-func SetupNewDbConn(addr string, maxOpenConnections int, maxIdleConnections int, maxIdleTime int) (*sql.DB, error) {
+	addr := config.GetString("DB_ADDR", "")
+	maxOpenConnections := config.GetInt("DB_MAX_OPEN_CONNECTIONS", 10)
+	maxIdleConnections := config.GetInt("DB_MAX_IDLE_CONNECTIONS", 10)
+	maxIdleTime := config.GetInt("DB_MAX_IDLE_TIME", 10)
+
 	log.Printf("Connecting to database at %s", addr)
 
 	db, err := sql.Open("mysql", addr)

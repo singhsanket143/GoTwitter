@@ -1,12 +1,16 @@
 package main
 
 import (
-	"GoTwitter/app"
 	dbConfig "GoTwitter/config/db"
 	config "GoTwitter/config/env"
 	db "GoTwitter/db/repository"
-	"fmt"
-	"log"
+	"GoTwitter/handlers"
+	"GoTwitter/router"
+	"GoTwitter/services"
+	"net/http"
+
+	"github.com/go-chi/chi/v5"
+	"go.uber.org/fx"
 )
 
 func main() {
@@ -14,32 +18,26 @@ func main() {
 	// Load environment variables
 	config.LoadEnv()
 
-	fallback_port := ":3001"
+	app := fx.New(
+		fx.Provide(
+			dbConfig.SetupNewDbConn,
 
-	port := config.GetString("PORT", fallback_port)
+			fx.Annotate(
+				db.NewTweetsStore,
+				fx.As(new(db.TweetsRepository)), // 👈 Important line
+			),
 
-	fmt.Println(port)
+			db.NewUsersStore,
 
-	cfg := app.Config{
-		Addr: port,
-		Db: dbConfig.DBConfig{
-			Addr:               config.GetString("DB_ADDR", ""),
-			MaxOpenConnections: config.GetInt("DB_MAX_OPEN_CONNECTIONS", 10),
-			MaxIdleConnections: config.GetInt("DB_MAX_IDLE_CONNECTIONS", 10),
-			MaxIdleTime:        config.GetInt("DB_MAX_IDLE_TIME", 10),
-		},
-	}
+			services.NewTweetService,
+			handlers.NewTweetHandler,
+			router.NewTweetRouter,
+			router.Mount,
+		),
+		fx.Invoke(func(r *chi.Mux) {
+			http.ListenAndServe(":8080", r)
+		}),
+	)
 
-	dbConfig.SetupNewDbConn(cfg.Db.Addr, cfg.Db.MaxOpenConnections, cfg.Db.MaxIdleConnections, cfg.Db.MaxIdleTime)
-
-	store := db.NewMySQLStorage(nil)
-
-	application := &app.Application{
-		Config: cfg,
-		Store:  store,
-	}
-
-	log.Printf("Server has started at %s", cfg.Addr)
-
-	log.Fatal(application.Run())
+	app.Run()
 }
