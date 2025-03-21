@@ -1,0 +1,117 @@
+digraph {
+	rankdir=RL;
+	graph [compound=true];
+	
+		subgraph cluster_0 {
+			label = "go.uber.org/fx";
+			constructor_0 [shape=plaintext label="New.func1"];
+			
+			"fx.Lifecycle" [label=<fx.Lifecycle>];
+			
+		}
+		
+		
+		subgraph cluster_1 {
+			label = "go.uber.org/fx";
+			constructor_1 [shape=plaintext label="(*App).shutdowner-fm"];
+			
+			"fx.Shutdowner" [label=<fx.Shutdowner>];
+			
+		}
+		
+		
+		subgraph cluster_2 {
+			label = "go.uber.org/fx";
+			constructor_2 [shape=plaintext label="(*App).dotGraph-fm"];
+			
+			"fx.DotGraph" [label=<fx.DotGraph>];
+			
+		}
+		
+		
+		subgraph cluster_3 {
+			label = "GoTwitter/config/db";
+			constructor_3 [shape=plaintext label="SetupNewDbConn"];
+			
+			"*sql.DB" [label=<*sql.DB>];
+			
+		}
+		
+		
+		subgraph cluster_4 {
+			label = "reflect";
+			constructor_4 [shape=plaintext label="makeFuncStub"];
+			
+			"db.TweetsRepository" [label=<db.TweetsRepository>];
+			
+		}
+		
+			constructor_4 -> "*sql.DB" [ltail=cluster_4];
+		
+		
+		subgraph cluster_5 {
+			label = "GoTwitter/db/repository";
+			constructor_5 [shape=plaintext label="NewUsersStore"];
+			
+			"*db.UsersStore" [label=<*db.UsersStore>];
+			
+		}
+		
+			constructor_5 -> "*sql.DB" [ltail=cluster_5];
+		
+		
+		subgraph cluster_6 {
+			label = "GoTwitter/services";
+			constructor_6 [shape=plaintext label="NewTweetService"];
+			
+			"services.TweetService" [label=<services.TweetService>];
+			
+		}
+		
+			constructor_6 -> "db.TweetsRepository" [ltail=cluster_6];
+		
+		
+		subgraph cluster_7 {
+			label = "GoTwitter/handlers";
+			constructor_7 [shape=plaintext label="NewTweetHandler"];
+			
+			"*handlers.TweetHandler" [label=<*handlers.TweetHandler>];
+			
+		}
+		
+			constructor_7 -> "services.TweetService" [ltail=cluster_7];
+		
+		
+		subgraph cluster_8 {
+			label = "GoTwitter/router";
+			constructor_8 [shape=plaintext label="NewTweetRouter"];
+			
+			"router.Routes" [label=<router.Routes>];
+			
+		}
+		
+			constructor_8 -> "*handlers.TweetHandler" [ltail=cluster_8];
+		
+		
+		subgraph cluster_9 {
+			label = "GoTwitter/router";
+			constructor_9 [shape=plaintext label="Mount"];
+			
+			"*chi.Mux" [label=<*chi.Mux>];
+			
+		}
+		
+			constructor_9 -> "router.Routes" [ltail=cluster_9];
+		
+		
+		subgraph cluster_10 {
+			label = "main";
+			constructor_10 [shape=plaintext label="main.func1"];
+			
+			"fxevent.Logger" [label=<fxevent.Logger>];
+			
+		}
+		
+		
+	
+}
