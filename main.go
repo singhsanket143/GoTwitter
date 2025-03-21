@@ -37,6 +37,16 @@ func main() {
 				fx.As(new(db.TweetsRepository)),
 			),
 
+			fx.Annotate(
+				db.NewTagsStore,
+				fx.As(new(db.TagsRepository)),
+			),
+
+			fx.Annotate(
+				db.NewTweetTagsStore,
+				fx.As(new(db.TweetTagsRepository)),
+			),
+
 			db.NewUsersStore,
 
 			services.NewTweetService,

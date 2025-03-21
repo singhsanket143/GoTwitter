@@ -50,10 +50,10 @@ digraph {
 		
 		
 		subgraph cluster_5 {
-			label = "GoTwitter/db/repository";
-			constructor_5 [shape=plaintext label="NewUsersStore"];
+			label = "reflect";
+			constructor_5 [shape=plaintext label="makeFuncStub"];
 			
-			"*db.UsersStore" [label=<*db.UsersStore>];
+			"db.TagsRepository" [label=<db.TagsRepository>];
 			
 		}
 		
@@ -61,52 +61,78 @@ digraph {
 		
 		
 		subgraph cluster_6 {
+			label = "reflect";
+			constructor_6 [shape=plaintext label="makeFuncStub"];
+			
+			"db.TweetTagsRepository" [label=<db.TweetTagsRepository>];
+			
+		}
+		
+			constructor_6 -> "*sql.DB" [ltail=cluster_6];
+		
+		
+		subgraph cluster_7 {
+			label = "GoTwitter/db/repository";
+			constructor_7 [shape=plaintext label="NewUsersStore"];
+			
+			"*db.UsersStore" [label=<*db.UsersStore>];
+			
+		}
+		
+			constructor_7 -> "*sql.DB" [ltail=cluster_7];
+		
+		
+		subgraph cluster_8 {
 			label = "GoTwitter/services";
-			constructor_6 [shape=plaintext label="NewTweetService"];
+			constructor_8 [shape=plaintext label="NewTweetService"];
 			
 			"services.TweetService" [label=<services.TweetService>];
 			
 		}
 		
-			constructor_6 -> "db.TweetsRepository" [ltail=cluster_6];
+			constructor_8 -> "db.TweetsRepository" [ltail=cluster_8];
+		
+			constructor_8 -> "db.TagsRepository" [ltail=cluster_8];
+		
+			constructor_8 -> "db.TweetTagsRepository" [ltail=cluster_8];
 		
 		
-		subgraph cluster_7 {
+		subgraph cluster_9 {
 			label = "GoTwitter/handlers";
-			constructor_7 [shape=plaintext label="NewTweetHandler"];
+			constructor_9 [shape=plaintext label="NewTweetHandler"];
 			
 			"*handlers.TweetHandler" [label=<*handlers.TweetHandler>];
 			
 		}
 		
-			constructor_7 -> "services.TweetService" [ltail=cluster_7];
+			constructor_9 -> "services.TweetService" [ltail=cluster_9];
 		
 		
-		subgraph cluster_8 {
+		subgraph cluster_10 {
 			label = "GoTwitter/router";
-			constructor_8 [shape=plaintext label="NewTweetRouter"];
+			constructor_10 [shape=plaintext label="NewTweetRouter"];
 			
 			"router.Routes" [label=<router.Routes>];
 			
 		}
 		
-			constructor_8 -> "*handlers.TweetHandler" [ltail=cluster_8];
+			constructor_10 -> "*handlers.TweetHandler" [ltail=cluster_10];
 		
 		
-		subgraph cluster_9 {
+		subgraph cluster_11 {
 			label = "GoTwitter/router";
-			constructor_9 [shape=plaintext label="Mount"];
+			constructor_11 [shape=plaintext label="Mount"];
 			
 			"*chi.Mux" [label=<*chi.Mux>];
 			
 		}
 		
-			constructor_9 -> "router.Routes" [ltail=cluster_9];
+			constructor_11 -> "router.Routes" [ltail=cluster_11];
 		
 		
-		subgraph cluster_10 {
+		subgraph cluster_12 {
 			label = "main";
-			constructor_10 [shape=plaintext label="main.func1"];
+			constructor_12 [shape=plaintext label="main.func1"];
 			
 			"fxevent.Logger" [label=<fxevent.Logger>];
 			
