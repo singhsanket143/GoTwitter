@@ -3,6 +3,7 @@ package services
 import (
 	db "GoTwitter/db/repository"
 	"GoTwitter/dto"
+	appError "GoTwitter/errors"
 	"GoTwitter/models"
 	"GoTwitter/utils"
 	"context"
@@ -11,10 +12,10 @@ import (
 )
 
 type TweetService interface {
-	CreateTweet(ctx context.Context, tweet *dto.CreateTweetDTO) (*models.Tweet, error)
-	GetAllTweets(ctx context.Context) ([]*models.Tweet, error)
-	GetTweetById(ctx context.Context, id int64) (*models.Tweet, error)
-	DeleteTweet(ctx context.Context, id int64) (bool, error)
+	CreateTweet(ctx context.Context, tweet *dto.CreateTweetDTO) (*models.Tweet, *appError.AppError)
+	GetAllTweets(ctx context.Context) ([]*models.Tweet, *appError.AppError)
+	GetTweetById(ctx context.Context, id int64) (*models.Tweet, *appError.AppError)
+	DeleteTweet(ctx context.Context, id int64) (bool, *appError.AppError)
 }
 
 type tweetService struct {
@@ -45,7 +46,7 @@ func NewTweetService(
 // Returns:
 // - A pointer to the created Tweet model if successful.
 // - An error if any step in the process fails.
-func (s *tweetService) CreateTweet(ctx context.Context, tweet *dto.CreateTweetDTO) (*models.Tweet, error) {
+func (s *tweetService) CreateTweet(ctx context.Context, tweet *dto.CreateTweetDTO) (*models.Tweet, *appError.AppError) {
 	tweetContent := tweet.Tweet
 
 	// parse hashtags from tweet content
@@ -55,8 +56,8 @@ func (s *tweetService) CreateTweet(ctx context.Context, tweet *dto.CreateTweetDT
 	var (
 		newtweet *models.Tweet
 		tags     []*models.Tag
-		tweetErr error
-		tagsErr  error
+		tweetErr *appError.AppError
+		tagsErr  *appError.AppError
 	)
 
 	// Use a WaitGroup to wait for both goroutines to complete
@@ -105,14 +106,14 @@ func (s *tweetService) CreateTweet(ctx context.Context, tweet *dto.CreateTweetDT
 	return newtweet, nil
 }
 
-func (s *tweetService) GetAllTweets(ctx context.Context) ([]*models.Tweet, error) {
+func (s *tweetService) GetAllTweets(ctx context.Context) ([]*models.Tweet, *appError.AppError) {
 	return s.tweetRepository.GetAll(ctx)
 }
 
-func (s *tweetService) GetTweetById(ctx context.Context, id int64) (*models.Tweet, error) {
+func (s *tweetService) GetTweetById(ctx context.Context, id int64) (*models.Tweet, *appError.AppError) {
 	return s.tweetRepository.GetByID(ctx, id)
 }
 
-func (s *tweetService) DeleteTweet(ctx context.Context, id int64) (bool, error) {
+func (s *tweetService) DeleteTweet(ctx context.Context, id int64) (bool, *appError.AppError) {
 	return s.tweetRepository.Delete(ctx, id)
 }

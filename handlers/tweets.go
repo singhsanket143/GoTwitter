@@ -28,7 +28,7 @@ func (h *TweetHandler) CreateTweetHandler(w http.ResponseWriter, r *http.Request
 
 	tweet, err := h.tweetService.CreateTweet(ctx, &payload)
 	if err != nil {
-		utils.WriteJsonError(w, http.StatusInternalServerError, "Something went wrong", err.Error())
+		utils.WriteJsonError(w, err.Code, "Something went wrong", err.Error())
 		return
 	}
 

@@ -1,15 +1,17 @@
 package db
 
 import (
+	"GoTwitter/errors"
 	"GoTwitter/models"
 	"context"
 	"database/sql"
 	"fmt"
+	"net/http"
 	"strings"
 )
 
 type TagsRepository interface {
-	BulkCreate(context context.Context, tag []string) ([]*models.Tag, error)
+	BulkCreate(context context.Context, tag []string) ([]*models.Tag, *errors.AppError)
 }
 
 type TagsStore struct {
@@ -20,10 +22,10 @@ func NewTagsStore(db *sql.DB) *TagsStore {
 	return &TagsStore{db}
 }
 
-func (s *TagsStore) BulkCreate(ctx context.Context, tags []string) ([]*models.Tag, error) {
+func (s *TagsStore) BulkCreate(ctx context.Context, tags []string) ([]*models.Tag, *errors.AppError) {
 
 	if len(tags) == 0 {
-		return nil, sql.ErrNoRows
+		return nil, errors.NewAppError(http.StatusBadRequest, "No tags provided", nil)
 	}
 
 	var placeholders []string
@@ -42,7 +44,7 @@ func (s *TagsStore) BulkCreate(ctx context.Context, tags []string) ([]*models.Ta
 	_, err := s.db.ExecContext(ctx, query, args...)
 
 	if err != nil {
-		return nil, err
+		return nil, errors.NewAppError(http.StatusInternalServerError, "Error creating tags", err)
 	}
 
 	selectQuery := fmt.Sprintf(`
@@ -53,7 +55,7 @@ func (s *TagsStore) BulkCreate(ctx context.Context, tags []string) ([]*models.Ta
 
 	rows, err := s.db.QueryContext(ctx, selectQuery, args...)
 	if err != nil {
-		return nil, err
+		return nil, errors.NewAppError(http.StatusInternalServerError, "Error fetching newly created tags", err)
 	}
 	defer rows.Close()
 
@@ -61,7 +63,7 @@ func (s *TagsStore) BulkCreate(ctx context.Context, tags []string) ([]*models.Ta
 	for rows.Next() {
 		tag := &models.Tag{}
 		if err := rows.Scan(&tag.Id, &tag.Name); err != nil {
-			return nil, err
+			return nil, errors.NewAppError(http.StatusInternalServerError, "Error scanning tags", err)
 		}
 		result = append(result, tag)
 	}
